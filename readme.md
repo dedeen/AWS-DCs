@@ -1,8 +1,12 @@
-# IaC Scripts for AWS
-This repo contains two sets of scripts to create resources in AWS, one set using CloudFormation, and one set using Terraform with AWS modules. 
-Dan Edeen, dan@dsblue.net, 2022 
+# Multiple AWS Region Build 
+This repo (Terraform + BASH) Builds VPCs in (4) regions, using multiple Terraform workspaces, one for each region.
 
 ## Overview
+I am using TF AWS profiver aliasing and switching 
+between workspaces for each region apply or destroy, as you cannot loop through multiple providers within a single call of the vpc module. 
+    Dan Edeen, dan@dsblue.net, 2022 
+
+
 The functionality realized by these script sets is as follows: 
 *  Create (1) VPC in the AWS Region specified. 
     * Three subnets (public, private with NATGW routes, and intra without NATGW routes)
