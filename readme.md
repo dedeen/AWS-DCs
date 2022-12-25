@@ -1,65 +1,29 @@
 # Multiple AWS Region Build 
-This repo (Terraform + BASH) Builds VPCs in (4) regions, using multiple Terraform workspaces, one for each region.
+This repo builds dual VPCs in multiple AWS regions using Terraform workspaces and multiple .tf scripts.
 
 ## Overview
-I am using TF AWS profiver aliasing and switching 
-between workspaces for each region apply or destroy, as you cannot loop through multiple providers within a single call of the vpc module. 
-    Dan Edeen, dan@dsblue.net, 2022 
-
-
+I am using bash scripts to build multiple terraform regions and switch between them during apply and destroy. The terraform state is stored separately 
+within these workspaces. I am also using provider aliasing, as  you cannot loop through multiple providers within a single call of the vpc module. 
+   
 The functionality realized by these script sets is as follows: 
-*  Create (1) VPC in the AWS Region specified. 
-    * Three subnets (public, private with NATGW routes, and intra without NATGW routes)
+*  Create (2) VPCs in each of 4 AWS regions. Each VPC contains the follwoing:  
+    * Two subnets (public, private with NATGW routes)
     * NAT gateway for private subnet to Internet 
     * IGW for public subnet to Internet
     * EIP associated with IGW
     * Routing tables and assocations for VPC
-    
-*  Generate AWS key pair (RSA) and store as a file in terraform exec directory. 
-    * File: terraform_key_pairNNNN.pem (NNNN = random string per run)
-    * You must save this file file to access the instances created with this key pair.  
-    
-*  Create multiple security groups within the VPC.
-    * Allow ipv4 traffic to and from public subnet, plus inbound ICMP. 
-    * Allow ssh into private subnet from public subnet - ~bastion-like setup. 
-    * Allow traffic into intra subnet, only from other subnets in VPC.
-    
-*  Create (3) linux EC2s, one per subnet (public, private, intra), using keypair for each. 
-    * ec2-inst1-public
-    * ec2-inst1-private
-    * ec2-inst1-intra
-
-*  Create a linux-based webserver in the public subnet: ec2-webserver1, using the same keypair.
-    * Via secgrps, allow inbound ssh and icmp, plus outbound ipv4 (needed to install s/w on server)
-    * Update linux pkgs, install apache, php,  and mariadb - Terraform uses ssh to access 
-      web server using the aforementioned keypair. 
-    * Start httpd and configure to auto start via systemctl
-    * After launching, you will be able to access Apache test page on the webserver via the instance's public IP address. 
-    
-
-----------------------------------
-
-
+   
 ## Prerequisites
 There are a a few steps to set up the environment: 
 * Log in to your AWS environment and launch a CloudShell terminal window. 
 * Clone repo to CloudShell, git is already installed. 
 * Run *setup.sh*; this will install Terraform and a couple of other useful tools. 
-Environment is ready to run Terraform scripts. 
 
-## Running .tf Scripts to Build AWS Infrastructure
-1. CD to the directory with .tf scripts and run the following commands. Follow the prompts. 
-2. `$terraform init`
-3. `$terraform plan`
-4. `$terraform apply`
+*  To build multi-vpc in multi-regsion, run *create_vpcs_multiple_regions.sh*
+*  To destroy everything built above, run *destroy_vpcs_multiple_regions.sh*
 
-
-## Cleaning up AWS Infrastructure
-
-The scripts contained here apply tags in the provider.tf file. These tags can be searched from 
-AWS console or CLI to confirm. When you are finished you should delete the resources created. 
-
-`$terraform destroy`
-
-You can confirm the resources have been deleted by again searching on the tags. 
+## Notes & Caveats 
+*  The scripts are tagging all of the resources so you can track the creation and destruction in the AWS console or via other methods. The tags are specified in the provider.tf file
+*  I filed one bug on the AWS module that you may encounter intermittently when running the create or destroy scripts. Rerunning the script typically works around this bug in my environment.  [https://github.com/hashicorp/terraform-provider-aws/issues/28364]
+==============
 
