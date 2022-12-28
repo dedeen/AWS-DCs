@@ -1,9 +1,8 @@
 # Multiple AWS Region Build 
-This repo builds dual VPCs in multiple AWS regions using Terraform workspaces and multiple .tf scripts.
+This repo builds dual VPCs in multiple AWS regions using Terraform workspaces and multiple .tf scripts. This suite is fully functional and can be run in your account. 
 
 ## Overview
-I am using bash scripts to build multiple terraform regions and switch between them during apply and destroy. The terraform state is stored separately 
-within these workspaces. I am also using provider aliasing, as  you cannot loop through multiple providers within a single call of the vpc module. 
+I am using bash scripts to build multiple terraform regions and switch between them during apply and destroy. The terraform state is stored separately within these workspaces. I am also using provider aliasing, as you cannot loop through multiple providers within a single call of the vpc module. 
    
 The functionality realized by these script sets is as follows: 
 *  Create (2) VPCs in each of 4 AWS regions. Each VPC contains the follwoing:  
